@@ -5,6 +5,8 @@ from datetime import datetime
 import boto3
 import requests
 
+# used in aws integration
+
 AWS_REGION = os.getenv("AWS_REGION")
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
 DATA_FOLDER = "raw_files"
