@@ -14,7 +14,7 @@ s3_client = boto3.client("s3", region_name=AWS_REGION)
 
 def fetch_flight_data() -> dict or None:
     response = requests.get(API_URL)
-
+    print(f"Status Code: {response.status_code}")
     if response.status_code == 200:
         data = response.json()
         return data
@@ -23,26 +23,25 @@ def fetch_flight_data() -> dict or None:
         return None
 
 
-def save_to_s3(data: dict) -> None:
-    if not data:
-        print("No data to save.")
-        return
-
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
-    file_name = f"{DATA_FOLDER}/flights_{timestamp}.json"
-
-    json_data = json.dumps(data, indent=4)
-
+def save_to_s3(data, bucket_name="test-bucket"):
     try:
+        timestamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
+        file_name = f"flights_data_{timestamp}.json"
+
+        json_data = json.dumps(data, indent=2)
+
         s3_client.put_object(
-            Bucket=S3_BUCKET_NAME,
+            Bucket=bucket_name,
             Key=file_name,
-            Body=json_data,
+            Body=json_data.encode("utf-8"),
             ContentType="application/json"
         )
-        print(f"File saved in S3: s3://{S3_BUCKET_NAME}//{file_name}")
+        print(f"Successfully saved {file_name} to S3 bucket {bucket_name}")
+        return file_name
+
     except Exception as e:
-        print(f"Error during saving to S3: {e}")
+        print(f"Error during saving to S3: {str(e)}")
+        return None
 
 
 if __name__ == "__main__":
