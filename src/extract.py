@@ -4,52 +4,60 @@ from datetime import datetime
 
 import boto3
 import requests
+from tools.config import CustomEnvironment
 
-# used in aws integration
-
-AWS_REGION = os.getenv("AWS_REGION")
-S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
+AWS_REGION = CustomEnvironment.get_aws_region()
+S3_BUCKET_NAME = CustomEnvironment.get_aws_s3_bucket()
 DATA_FOLDER = "raw_files"
 API_URL = "https://opensky-network.org/api/states/all"
 s3_client = boto3.client("s3", region_name=AWS_REGION)
 
 
-def fetch_flight_data() -> dict or None:
-    response = requests.get(API_URL)
-    print(f"Status Code: {response.status_code}")
-    if response.status_code == 200:
-        data = response.json()
-        return data
-    else:
-        print(f"Error during data downloading: {response.status_code}")
-        return None
+class DataGenerator:
+
+    @staticmethod
+    def fetch_flight_data() -> dict or None:
+        response = requests.get(API_URL)
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        else:
+            print(f"Error during data downloading: {response.status_code}")
+            return None
+
+    @staticmethod
+    def save_data_to_file(data) -> str:
+        filename = f"{datetime.utcnow().strftime('%Y-%m-%d')}.json"
+        try:
+            with open(filename, "r", encoding="utf-8") as file:
+                existing_data = json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            existing_data = []
+
+        existing_data.append(data)
+
+        with open(filename, "w", encoding="utf-8") as file:
+            json.dump(existing_data, file, indent=4)
+
+        return filename
 
 
-def save_to_s3(data, bucket_name="test-bucket"):
-    try:
-        timestamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
-        file_name = f"flights_data_{timestamp}.json"
+class DataUploader:
+    @staticmethod
+    def upload_to_s3(file_name: str) -> None:
+        if not os.path.exists(file_name):
+            print(f"❌ File {file_name} does not exist! Upload not possible.")
+            return
 
-        json_data = json.dumps(data, indent=2)
+        try:
+            s3_client.upload_file(file_name, S3_BUCKET_NAME, f"raw_files/{file_name}")
+            print(f"✅ File {file_name} loaded to S3 t directory 'raw_files/'.")
 
-        s3_client.put_object(
-            Bucket=bucket_name,
-            Key=file_name,
-            Body=json_data.encode("utf-8"),
-            ContentType="application/json"
-        )
-        print(f"Successfully saved {file_name} to S3 bucket {bucket_name}")
-        return file_name
-
-    except Exception as e:
-        print(f"Error during saving to S3: {str(e)}")
-        return None
+        except Exception as e:
+            print(f"❌ Error during loading {file_name} file to S3: {e}")
 
 
 if __name__ == "__main__":
-    print("Downloading flights data...")
-    flight_data = fetch_flight_data()
-
-    if flight_data:
-        print("Saving data to S3...")
-        save_to_s3(flight_data)
+    data = DataGenerator.fetch_flight_data()
+    filename = DataGenerator.save_data_to_file(data)
+    DataUploader.upload_to_s3(filename)
