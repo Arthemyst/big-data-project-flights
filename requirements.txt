@@ -6,3 +6,4 @@ boto3
 moto
 pyspark
 django-environ
+PyArrow
