@@ -1,11 +1,9 @@
 import json
 import os
 import pytest
-from unittest.mock import patch, MagicMock
-from moto import mock_aws
-import boto3
+from unittest.mock import patch
 
-from src.extract import DataGenerator, DataUploader, S3_BUCKET_NAME
+from src.extract import DataGenerator
 
 
 @pytest.fixture
