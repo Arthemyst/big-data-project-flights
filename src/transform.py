@@ -55,5 +55,5 @@ if __name__ == "__main__":
     input_filename = f"{datetime.utcnow().strftime('%Y-%m-%d')}.json"
     input_filepath = os.path.join(RAW_DATA_DIR, input_filename)
     df = FlightDataTransformer.read_raw_data_locally(input_filepath)
-    # transformed_df = FlightDataTransformer.transform_data(df)
-    # FlightDataTransformer.save_transformed_data(transformed_df, PROCESSED_DATA_DIR)
+    transformed_df = FlightDataTransformer.transform_data(df)
+    FlightDataTransformer.save_transformed_data(transformed_df, PROCESSED_DATA_DIR)
