@@ -1,8 +1,9 @@
-import os
 import json
-import boto3
-import pandas as pd
+import os
 from datetime import datetime
+
+import pandas as pd
+
 from tools.config import CustomEnvironment
 
 PROCESSED_DATA_DIR = os.path.join(os.path.abspath(os.path.join(os.getcwd(), os.pardir)), 'processed_files')
@@ -47,22 +48,15 @@ class FlighDataAnalysis:
         }
         return analysis_results
 
-
-
-
     @staticmethod
     def save_transformed_data(data: dict, output_path: str):
-        if df is None or df.empty:
-            print("No data to save.")
-            return
-
         output_filepath = os.path.join(output_path, f"{datetime.utcnow().strftime('%Y-%m-%d')}.json")
         os.makedirs(output_path, exist_ok=True)
 
         try:
             with open(output_filepath, "w", encoding="utf-8") as file:
                 json.dump(data, file, indent=4)
-            print(f"✅ Transformed data saved locally to: {output_filepath}")
+            print(f"Transformed data saved locally to: {output_filepath}")
         except Exception as e:
             print(f"Error saving JSON file: {e}")
 
