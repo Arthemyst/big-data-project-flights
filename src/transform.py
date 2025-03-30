@@ -19,7 +19,7 @@ class FlightDataTransformer:
                 data = json.load(f)
             return pd.DataFrame(data[0]["states"])
         except Exception as e:
-            print(f"❌ Error reading local file: {e}")
+            print(f"Error reading local file: {e}")
             return None
 
     @staticmethod
@@ -55,16 +55,16 @@ class FlightDataTransformer:
     @staticmethod
     def save_transformed_data(df, output_path: str):
         if df is None or df.empty:
-            print("❌ No data to save.")
+            print("No data to save.")
             return
 
         output_filepath = os.path.join(output_path, f"{datetime.utcnow().strftime('%Y-%m-%d')}.csv")
 
         try:
             df.to_csv(output_filepath)
-            print(f"✅ Transformed data saved locally to: {output_filepath}")
+            print(f"Transformed data saved locally to: {output_filepath}")
         except Exception as e:
-            print(f"❌ Error saving JSON file: {e}")
+            print(f"Error saving JSON file: {e}")
 
 
 if __name__ == "__main__":
@@ -72,5 +72,4 @@ if __name__ == "__main__":
     input_filepath = os.path.join(RAW_DATA_DIR, input_filename)
     df = FlightDataTransformer.read_raw_data_locally(input_filepath)
     transformed_df = FlightDataTransformer.transform_data(df)
-    print(transformed_df)
     FlightDataTransformer.save_transformed_data(transformed_df, PROCESSED_DATA_DIR)
