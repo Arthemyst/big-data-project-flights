@@ -1,10 +1,41 @@
 import json
 import os
-
 import boto3
 import pandas as pd
 
 s3_client = boto3.client('s3')
+
+
+def analyze_data(transformed_df):
+    unique_aircraft = transformed_df["icao24"].nunique()
+
+    avg_speed = transformed_df["speed_kmh"].mean()
+
+    top_countries = transformed_df["origin_country"].value_counts().head(5)
+
+    min_lat, max_lat = transformed_df["latitude"].min(), transformed_df["latitude"].max()
+    min_lon, max_lon = transformed_df["longitude"].min(), transformed_df["longitude"].max()
+
+    fastest_aircraft = transformed_df.nlargest(5, "speed_kmh")[["icao24", "callsign", "speed_kmh"]]
+
+    analysis_results = {
+        "unique_aircraft": unique_aircraft,
+        "average_speed_kmh": avg_speed,
+        "top_countries": top_countries.to_dict(),
+        "bounding_box": {
+            "min_latitude": min_lat,
+            "max_latitude": max_lat,
+            "min_longitude": min_lon,
+            "max_longitude": max_lon,
+        },
+        "fastest_aircraft": fastest_aircraft.to_dict(orient="records")
+    }
+
+    output_file = "/tmp/analysis_results.json"
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(analysis_results, f, indent=4)
+
+    return output_file
 
 
 def process_file(file_name, bucket_name):
@@ -37,6 +68,9 @@ def process_file(file_name, bucket_name):
 
     s3_client.upload_file(output_file, bucket_name, f'processed/{os.path.basename(output_file)}')
     print(f"File processed and saved to: processed/{os.path.basename(output_file)}")
+
+    analysis_file = analyze_data(transformed_df)
+    s3_client.upload_file(analysis_file, bucket_name, f'analysis/{os.path.basename(analysis_file)}')
 
 
 def lambda_handler(event, context):
