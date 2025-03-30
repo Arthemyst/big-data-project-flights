@@ -23,22 +23,6 @@ class FlighDataAnalysis:
             return None
 
     @staticmethod
-    def read_processed_file_from_s3(bucket_name: str, input_path: str):
-        s3 = boto3.client('s3')
-        response = s3.list_objects_v2(Bucket=bucket_name, Prefix=input_path)
-
-        file_list = [obj['Key'] for obj in response.get('Contents', [])]
-
-        if file_list:
-            file = file_list[0]
-            obj = s3.get_object(Bucket=bucket_name, Key=file)
-            data = json.loads(obj['Body'].read().decode('utf-8'))
-            return pd.DataFrame(data.get("states", []))
-        else:
-            print("No files found in the input folder.")
-            return None
-
-    @staticmethod
     def analyze_data(transformed_df: pd.DataFrame) -> dict:
         unique_aircraft = transformed_df["icao24"].nunique()
         avg_speed = transformed_df["speed_kmh"].mean()
@@ -86,7 +70,8 @@ class FlighDataAnalysis:
 if __name__ == "__main__":
     input_filename = f"{datetime.utcnow().strftime('%Y-%m-%d')}.csv"
     input_filepath = os.path.join(PROCESSED_DATA_DIR, input_filename)
-    df = FlighDataAnalysis.read_processed_file_locally(input_filepath)
-    transformed_df = FlighDataAnalysis.analyze_data(df)
-    print(transformed_df)
-    FlighDataAnalysis.save_transformed_data(transformed_df, ANALYSIS_DIR)
+    # df = FlighDataAnalysis.read_processed_file_locally(input_filepath)
+    # df = FlighDataAnalysis.read_processed_file_from_s3(BUCKET_NAME, input_filepath)
+    # transformed_df = FlighDataAnalysis.analyze_data(df)
+    # print(transformed_df)
+    # FlighDataAnalysis.save_transformed_data(transformed_df, ANALYSIS_DIR)
