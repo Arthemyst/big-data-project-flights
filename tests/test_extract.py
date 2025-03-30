@@ -47,7 +47,6 @@ def test_fetch_flight_data_failure(mock_requests_get):
 
 
 def test_save_data_to_file(mock_flight_data, tmp_path):
-    """Test that save_data_to_file correctly writes and appends data to a JSON file."""
     test_filename = tmp_path / "test_flight_data.json"
 
     assert not test_filename.exists()

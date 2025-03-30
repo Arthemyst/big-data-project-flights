@@ -52,15 +52,15 @@ class DataUploader:
         data_dir_path = os.path.join(os.path.abspath(os.path.join(os.getcwd(), os.pardir)), DATA_FOLDER)
         file_path = os.path.join(data_dir_path, filename)
         if not os.path.exists(file_path):
-            print(f"❌ File {file_name} does not exist! Upload not possible.")
+            print(f"File {file_name} does not exist! Upload not possible.")
             return
 
         try:
             s3_client.upload_file(file_path, S3_BUCKET_NAME, f"raw_files/{file_name}")
-            print(f"✅ File {file_name} loaded to S3 t directory 'raw_files/'.")
+            print(f"File {file_name} loaded to S3 t directory 'raw_files/'.")
 
         except Exception as e:
-            print(f"❌ Error during loading {file_name} file to S3: {e}")
+            print(f"Error during loading {file_name} file to S3: {e}")
 
 
 if __name__ == "__main__":
