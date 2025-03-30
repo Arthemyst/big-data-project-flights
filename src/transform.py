@@ -23,22 +23,6 @@ class FlightDataTransformer:
             return None
 
     @staticmethod
-    def read_raw_data_from_s3(bucket_name: str, input_path: str):
-        s3 = boto3.client('s3')
-        response = s3.list_objects_v2(Bucket=bucket_name, Prefix=input_path)
-
-        file_list = [obj['Key'] for obj in response.get('Contents', [])]
-
-        if file_list:
-            file = file_list[0]
-            obj = s3.get_object(Bucket=bucket_name, Key=file)
-            data = json.loads(obj['Body'].read().decode('utf-8'))
-            return pd.DataFrame(data.get("states", []))
-        else:
-            print("No files found in the input folder.")
-            return None
-
-    @staticmethod
     def transform_data(df):
 
         columns = ["icao24", "callsign", "origin_country", None, None, "longitude", "latitude", "altitude_m", None,
@@ -71,5 +55,5 @@ if __name__ == "__main__":
     input_filename = f"{datetime.utcnow().strftime('%Y-%m-%d')}.json"
     input_filepath = os.path.join(RAW_DATA_DIR, input_filename)
     df = FlightDataTransformer.read_raw_data_locally(input_filepath)
-    transformed_df = FlightDataTransformer.transform_data(df)
-    FlightDataTransformer.save_transformed_data(transformed_df, PROCESSED_DATA_DIR)
+    # transformed_df = FlightDataTransformer.transform_data(df)
+    # FlightDataTransformer.save_transformed_data(transformed_df, PROCESSED_DATA_DIR)
