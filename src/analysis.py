@@ -70,8 +70,6 @@ class FlighDataAnalysis:
 if __name__ == "__main__":
     input_filename = f"{datetime.utcnow().strftime('%Y-%m-%d')}.csv"
     input_filepath = os.path.join(PROCESSED_DATA_DIR, input_filename)
-    # df = FlighDataAnalysis.read_processed_file_locally(input_filepath)
-    # df = FlighDataAnalysis.read_processed_file_from_s3(BUCKET_NAME, input_filepath)
-    # transformed_df = FlighDataAnalysis.analyze_data(df)
-    # print(transformed_df)
-    # FlighDataAnalysis.save_transformed_data(transformed_df, ANALYSIS_DIR)
+    df = FlighDataAnalysis.read_processed_file_locally(input_filepath)
+    transformed_df = FlighDataAnalysis.analyze_data(df)
+    FlighDataAnalysis.save_transformed_data(transformed_df, ANALYSIS_DIR)
